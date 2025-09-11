@@ -1,0 +1,57 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: rewrite-nginx
+  namespace: nginxwebapp
+spec:
+  stripPrefix:
+    prefixes:
+      - /nginx
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-nginx-ingress
+  namespace: nginxwebapp
+  annotations:
+    
+    external-dns.alpha.kubernetes.io/hostname: nginx.kdvops.com
+    external-dns.alpha.kubernetes.io/ttl: "120"
+    # OPCIONAL: si quieres forzar un CNAME en lugar de A:
+    external-dns.alpha.kubernetes.io/target: "silencfox.duckdns.org"
+    traefik.ingress.kubernetes.io/router.middlewares: nginxwebapp-rewrite-nginx@kubernetescrd
+    # Entrar por HTTP y HTTPS (web, websecure)
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    # Pedir el certificado con cert-manager (puedes usar staging para probar)    
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: nginx.kdvops.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx
+            port:
+              number: 8000
+
+  tls:
+  - hosts:
+    - nginx.kdvops.com
+    secretName: nginx-kdvops-com-tls
+    
+#spec:
+#  ingressClassName: traefik
+#  rules:
+#  - http:
+#      paths:
+#      - pathType: Prefix
+#        path: "/nginx"
+#        backend:
+#          service:
+#            name: nginx
+#            port:
+#              number: 8000

@@ -14,6 +14,11 @@ metadata:
     nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required '
     # custom max body size for file uploading like backing image uploading
     nginx.ingress.kubernetes.io/proxy-body-size: 10000m
+    
+    external-dns.alpha.kubernetes.io/hostname: longhorn.kdvops.com
+    external-dns.alpha.kubernetes.io/ttl: "120"
+    # OPCIONAL: si quieres forzar un CNAME en lugar de A:
+    external-dns.alpha.kubernetes.io/target: "silencfox.duckdns.org"
 spec:
   ingressClassName: traefik
   rules:

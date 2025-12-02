@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: longhorn-vs
+  namespace: default
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: longhorn.kdvops.com
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+spec:
+  hosts:
+  - "nginx.kdvops.com"
+  gateways:
+  - longhorn-gateway
+  http:
+  - route:
+    - destination:
+        host: nginx-demo
+        port:
+          number: 80

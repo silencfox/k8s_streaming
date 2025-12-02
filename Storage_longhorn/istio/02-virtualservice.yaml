@@ -8,12 +8,12 @@ metadata:
     external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
 spec:
   hosts:
-  - "nginx.kdvops.com"
+  - "longhorn.kdvops.com"
   gateways:
   - longhorn-gateway
   http:
   - route:
     - destination:
-        host: nginx-demo
+        host: longhorn-frontend
         port:
           number: 80

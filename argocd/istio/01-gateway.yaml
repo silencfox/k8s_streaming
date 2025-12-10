@@ -2,7 +2,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: argocd-gateway
-  namespace: default
+  namespace: istio-system
 spec:
   selector:
     istio: ingressgateway   # usa el ingress por defecto de Istio

@@ -22,3 +22,12 @@ kubectl apply -f ingress_svc.yaml
 
 ## para servicio con traefik
 kubectl apply -f traefik_svc.yaml
+
+## install argo RollOut
+kubectl create namespace argo-rollouts
+kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
+
+kubectl argo rollouts version
+
+kubectl argo rollouts dashboard

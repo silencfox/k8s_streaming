@@ -17,9 +17,12 @@ kubectl -n longhorn-system apply -f longhorn-ingress.yml
 sudo apt-get update
 sudo apt-get install -y open-iscsi nfs-common
 
+
+
 2) Habilitar y arrancar los servicios
 # Algunos sistemas sólo tienen iscsid; en otros también open-iscsi
 sudo systemctl enable --now iscsid || true
+sudo systemctl start iscsid
 sudo systemctl enable --now open-iscsi || true
 
 # Verifica

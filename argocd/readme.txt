@@ -31,7 +31,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret \
 kubectl create namespace argo-rollouts
 kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
 kubectl apply -n argo-rollouts -f https://raw.githubusercontent.com/argoproj/argo-rollouts/stable/manifests/dashboard-install.yaml
-
+kubectl -n argo-rollouts patch svc argo-rollouts-dashboard   -p '{"spec":{"type":"LoadBalancer"}}'
 
 
 kubectl argo rollouts version

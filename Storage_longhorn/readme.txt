@@ -35,6 +35,7 @@ sudo modprobe iscsi_tcp
 sudo modprobe libiscsi
 sudo modprobe scsi_transport_iscsi
 
+sudo mount --make-rshared /
 
 
 # Hacerlo persistente

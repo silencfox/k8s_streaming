@@ -23,6 +23,10 @@ kubectl apply -f ingress_svc.yaml
 ## para servicio con traefik
 kubectl apply -f traefik_svc.yaml
 
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 --decode
+
+
 ## install argo RollOut
 kubectl create namespace argo-rollouts
 kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml

@@ -15,7 +15,7 @@ kubectl -n longhorn-system apply -f longhorn-ingress.yml
 
 1-)  Instalar dependencias en cada nodo
 sudo apt-get update
-sudo apt-get install -y open-iscsi nfs-common
+sudo apt-get install -y open-iscsi nfs-common cryptsetup
 
 
 

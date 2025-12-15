@@ -1,19 +1,78 @@
-curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+# External Secrets Operator con Azure Key Vault en Kubernetes
 
+Este documento describe paso a paso cómo integrar **Azure Key Vault** con **Kubernetes** utilizando **External Secrets Operator (ESO)** para sincronizar secretos de forma segura.
+
+---
+
+## Requisitos
+
+- Kubernetes funcionando
+- `kubectl`
+- `helm`
+- Azure CLI (`az`)
+- Azure Key Vault creado
+- Permisos para crear recursos en el clúster
+
+---
+
+## 1. Instalar Helm
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+```
+
+Verificar instalación:
+
+```bash
+helm version
+```
+
+---
+
+## 2. Instalar External Secrets Operator
+
+Agregar el repositorio Helm:
+
+```bash
 helm repo add external-secrets https://charts.external-secrets.io
 helm repo update
+```
 
-helm install external-secrets external-secrets/external-secrets \
-  -n external-secrets \
-  --create-namespace
+Instalar el operador:
 
+```bash
+helm install external-secrets external-secrets/external-secrets   -n external-secrets   --create-namespace
+```
+
+Verificar que los pods estén corriendo:
+
+```bash
 kubectl get pods -n external-secrets
+```
 
+---
 
+## 3. Crear Service Principal en Azure
+
+Este Service Principal será usado por Kubernetes para autenticarse contra Azure Key Vault.
+
+```bash
 az ad sp create-for-rbac --name eso-k8s-sp --skip-assignment
+```
 
+Guarda los siguientes valores del output:
 
-#### CREAR SECRET DE AZURE
+- `clientId`
+- `clientSecret`
+- `tenantId`
+
+---
+
+## 4. Crear el Secret de Azure en Kubernetes
+
+Este Secret almacena las credenciales del Service Principal.
+
+```yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -23,10 +82,21 @@ type: Opaque
 stringData:
   client-id: "<CLIENT_ID>"
   client-secret: "<CLIENT_SECRET>"
+```
 
+Aplicar:
+
+```bash
+kubectl apply -f azure-sp.yaml
+```
+
+---
 
 ## 5. Definir el SecretStore (Azure Key Vault)
-## Si usaras Managed Identity (AKS), esta sección se simplifica bastante.
+
+> Si utilizas **Managed Identity (AKS)**, esta sección se simplifica y no requiere `clientSecret`.
+
+```yaml
 apiVersion: external-secrets.io/v1beta1
 kind: SecretStore
 metadata:
@@ -47,10 +117,21 @@ spec:
           name: azure-sp
           key: client-secret
           namespace: external-secrets
+```
 
+Aplicar:
 
-##. Crear el ExternalSecret
-## Este recurso mapea secretos de Azure → Secret de Kubernetes.
+```bash
+kubectl apply -f secretstore.yaml
+```
+
+---
+
+## 6. Crear el ExternalSecret
+
+Este recurso sincroniza secretos desde Azure Key Vault hacia Kubernetes.
+
+```yaml
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
@@ -71,43 +152,78 @@ spec:
     - secretKey: API_KEY
       remoteRef:
         key: api-key
+```
 
-###  VERIFICAR
+Aplicar:
+
+```bash
+kubectl apply -f externalsecret.yaml
+```
+
+---
+
+## 7. Verificar el Secret creado
+
+```bash
 kubectl get secret app-secrets
+```
 
+---
 
+## 8. Consumir el Secret en un Deployment
 
-## Consumir el Secret en un Deployment
-## Como variables de entorno
+### Como variables de entorno
+
+```yaml
 env:
 - name: DB_PASSWORD
   valueFrom:
     secretKeyRef:
       name: app-secrets
       key: DB_PASSWORD
+```
 
-## Como volumen
+### Como volumen
+
+```yaml
 volumes:
 - name: secrets
   secret:
     secretName: app-secrets
+```
 
+---
 
+## 9. Rotación automática de secretos
 
-## Rotación automática de secretos
-## ESO sincroniza periódicamente (refreshInterval)
-## Si cambias el secreto en Azure Key Vault:
-## Kubernetes Secret se actualiza
-## El Pod no se reinicia automáticamente
-## Para rotación efectiva:
-## Usa rollout restart
-## O un reloader (ej: stakater/reloader)
+- ESO sincroniza periódicamente según `refreshInterval`
+- Si el secreto cambia en Azure Key Vault:
+  - El Secret en Kubernetes se actualiza
+  - **El Pod no se reinicia automáticamente**
 
+### Opciones para aplicar cambios:
+- `kubectl rollout restart deployment <nombre>`
+- Usar un reloader como:
+  - `stakater/reloader`
 
-10. Buenas prácticas (recomendadas)
+---
 
-Un SecretStore por proveedor
-Usar ClusterSecretStore si varios namespaces consumen lo mismo
-No versionar secretos en Git
-Usar Managed Identity en AKS si es posible
-Limitar permisos del Service Principal (principio de mínimo privilegio)
+## 10. Buenas prácticas (recomendadas)
+
+- Un `SecretStore` por proveedor
+- Usar `ClusterSecretStore` si múltiples namespaces comparten secretos
+- No versionar secretos en Git
+- Preferir **Managed Identity en AKS**
+- Limitar permisos del Service Principal (principio de mínimo privilegio)
+
+---
+
+## Referencias
+
+- https://external-secrets.io/
+- https://learn.microsoft.com/azure/key-vault/
+- https://learn.microsoft.com/azure/aks/
+
+---
+
+Autor: DevOps / Kubernetes

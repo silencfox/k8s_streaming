@@ -29,11 +29,17 @@ kubectl get pods -n kube-system | grep sealed
 ---
 
 ## 2. Instalación del cliente kubeseal (Linux)
-
+## AMD64
 ```bash
 wget https://github.com/bitnami-labs/sealed-secrets/releases/latest/download/kubeseal-linux-amd64
 chmod +x kubeseal-linux-amd64
 sudo mv kubeseal-linux-amd64 /usr/local/bin/kubeseal
+```
+## ARM64
+```bash
+wget https://github.com/bitnami-labs/sealed-secrets/releases/latest/download/kubeseal-linux-arm64
+chmod +x kubeseal-linux-arm64
+sudo mv kubeseal-linux-arm64 /usr/local/bin/kubeseal
 ```
 
 ---

@@ -37,9 +37,11 @@ sudo mv kubeseal-linux-amd64 /usr/local/bin/kubeseal
 ```
 ## ARM64
 ```bash
-wget https://github.com/bitnami-labs/sealed-secrets/releases/latest/download/kubeseal-linux-arm64
-chmod +x kubeseal-linux-arm64
-sudo mv kubeseal-linux-arm64 /usr/local/bin/kubeseal
+wget https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.33.1/kubeseal-0.33.1-linux-arm64.tar.gz
+tar -xzf kubeseal-0.33.1-linux-arm64.tar.gz
+chmod +x kubeseal
+sudo mv kubeseal /usr/local/bin/kubeseal
+
 ```
 
 ---

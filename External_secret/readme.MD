@@ -97,7 +97,7 @@ kubectl apply -f azure-sp.yaml
 > Si utilizas **Managed Identity (AKS)**, esta sección se simplifica y no requiere `clientSecret`.
 
 ```yaml
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: SecretStore
 metadata:
   name: azure-keyvault
